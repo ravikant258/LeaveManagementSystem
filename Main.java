@@ -1,7 +1,11 @@
 package lms.leaveManagement.main;
  
 import lms.leaveManagement.validate.*;
+
+import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 
 import lms.leaveManagement.dao.EmployeeDao;
@@ -26,15 +30,7 @@ public class Main {
 	public static void main(String[] args) {
 		System.out.println("Hello world!");
 
-		 try {
-			showPendingLeaveHistoryMain();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		
 		int choice;
 
@@ -114,9 +110,9 @@ public class Main {
 	public static void applyLeaveDaoValMain() throws SQLException, ClassNotFoundException {
 		System.out.println("======== Apply Leave ========");
 		  LeaveHistroy leave=new LeaveHistroy();
-		 try {
-	            System.out.print("Enter Leave ID: ");
-	            leave.setLeaveId(sc.nextInt());
+		
+//	            System.out.print("Enter Leave ID: ");
+//	            leave.setLeaveId(sc.nextInt());
 
 	            System.out.print("Enter Employee ID: ");
 	            leave.setEmpId(sc.nextInt());
@@ -131,40 +127,32 @@ public class Main {
 	            System.out.print("Enter Manager Comments: ");
 	            leave.setLeaveMngrComments(sc.nextLine());
 
-	            System.out.print("Enter Leave Type (e.g., EL): ");
-	            leave.setLeaveType(LeaveType.valueOf(sc.nextLine().toUpperCase()));
-
-	            System.out.print("Enter Leave Status (PENDING, APPROVED, DENIED): ");
-	            leave.setLeaveStatus(LeaveStatus.valueOf(sc.nextLine().toUpperCase()));
+//	            System.out.print("Enter Leave Type (e.g., EL): ");
+//	            leave.setLeaveType(LeaveType.valueOf(sc.nextLine().toUpperCase()));
+//
+//	            System.out.print("Enter Leave Status (PENDING, APPROVED, DENIED): ");
+//	            leave.setLeaveStatus(LeaveStatus.valueOf(sc.nextLine().toUpperCase()));
 
 	            System.out.print("Enter Leave Start Date (yyyy-MM-dd): ");
 	            String startDateStr = sc.nextLine();
-	            leave.setLeaveStartDate(startDateStr);
+	            leave.setLeaveStartDate(Date.valueOf(startDateStr));  // using java.sql.Date
+
 	            System.out.print("Enter Leave End Date (yyyy-MM-dd): ");
 	            String endDateStr = sc.nextLine();
- 	            leave.setLeaveEndDate(endDateStr);
-
+	            leave.setLeaveEndDate(Date.valueOf(endDateStr));
+	            
+                System.out.println("Enter the mangerId");
+                int managerId=sc.nextInt();
+                
+                 System.out.println(leave);
+                
 	            System.out.println("\nLeave Details Entered:");
 	            System.out.println(leave);
+	            System.out.println(vlayer.applyLeaveDaoVal(leave,managerId));
+		        
+		 
+
 		
-		
-		
-		Employee employee=new Employee();
-		Scanner sc = new Scanner(System.in);
-		System.out.print("Enter Employee ID: ");
-		int empId = sc.nextInt();
-		sc.nextLine(); // consume newline
-		System.out.print("Enter Leave Start Date (yyyy-mm-dd): ");
-		String startDate = sc.nextLine();
-		System.out.print("Enter Leave End Date (yyyy-mm-dd): ");
-		String endDate = sc.nextLine();
-		System.out.print("Enter Leave Type (e.g., EL): ");
-		String leaveType = sc.nextLine();
-		System.out.print("Enter Leave Reason: ");
-		String leaveReason = sc.nextLine();
-		// Call your DAO method here
-		
-		System.out.println(vlayer.applyLeaveDaoVal(employee));
   	}
 
 
