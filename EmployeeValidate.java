@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import lms.leaveManagement.dao.EmployeeDao;
 import lms.leaveManagement.dao.EmployeeDaoImpl;
 import lms.leaveManagement.model.Employee;
+import lms.leaveManagement.model.LeaveHistroy;
 
 public class EmployeeValidate {
 
@@ -31,10 +32,9 @@ public class EmployeeValidate {
 
 //	String applyLeaveDao(int empId ,String  DateLeaveStartDate,String LeaveEndDate,String LeaveType,String  LeaveReason) throws ClassNotFoundException, SQLException;
 //
-	public String applyLeaveDaoVal(int empId, String DateLeaveStartDate, String LeaveEndDate, String LeaveType,
-			String LeaveReason) throws ClassNotFoundException, SQLException {
+	public String applyLeaveDaoVal(LeaveHistroy leaveHistroy,int managerId) throws ClassNotFoundException, SQLException {
 		
-		return this.emplDao.applyLeaveDao(empId,DateLeaveStartDate,LeaveEndDate,LeaveType,LeaveReason);
+		return this.emplDao.applyLeaveDao(leaveHistroy, managerId);
 	}
 
 //	//	String leaveHistory (select * from LeaveHistory where empId=1000)
