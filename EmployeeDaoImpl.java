@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import lms.leaveManagement.model.Employee;
+import lms.leaveManagement.model.LeaveHistroy;
 import lms.leaveManagement.util.ConnectionHelper;
 
 public class EmployeeDaoImpl implements EmployeeDao {
@@ -72,34 +73,48 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		return "not added ";
 	}
 
-	@Override
-	public String applyLeaveDao(int empId, String LeaveStartDate, String LeaveEndDate, String LeaveType,
-			String LeaveReason) throws ClassNotFoundException, SQLException {
+
+	public String applyLeaveDao(LeaveHistroy leaveHistroy,int managerId) throws ClassNotFoundException, SQLException {
 		Connection connection = ConnectionHelper.getConnection();
 
-		int noOfLeaveDays = noOfDays(LeaveStartDate,LeaveEndDate);
-		if (noOfLeaveDays < getLeaveBalance(empId)) {
-			updateEmployLeave(noOfLeaveDays, empId);
+		int leaveDaysWant = noOfDays(leaveHistroy.getLeaveStartDate(),leaveHistroy.getLeaveEndDate());
+		
+		int availableleave=getLeaveBalance(leaveHistroy.getEmpId());
+		
+		if (leaveDaysWant < availableleave) {
+			
 
+			updateEmployLeave(leaveDaysWant, leaveHistroy.getEmpId());
 
-			String sql = "INSERT INTO leave_history (" + "LEAVE_NO_OF_DAYS, LEAVE_MNGR_COMMENTS, EMP_ID, "
-					+ "LEAVE_START_DATE, LEAVE_END_DATE, LEAVE_TYPE, " + "LEAVE_STATUS, LEAVE_REASON"
-					+ ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+           System.out.println( insertInLeaveHistory(leaveHistroy));
+			
+          return "leave is applied sucessfully";
+		}
+        return "leave is not  applied sucessfully";
+
+	}
+		public String insertInLeaveHistory(LeaveHistroy leaveHistroy) throws ClassNotFoundException, SQLException {
+			System.out.println("insert history is called");
+			Connection connection = ConnectionHelper.getConnection(); // fixed typo
+
+			String sql = "INSERT INTO leave_history (" +
+			             "LEAVE_NO_OF_DAYS, LEAVE_MNGR_COMMENTS, EMP_ID, " +
+			             "LEAVE_START_DATE, LEAVE_END_DATE, LEAVE_REASON) " +
+			             "VALUES (?, ?, ?, ?, ?, ?)";
 
 			PreparedStatement pstmt = connection.prepareStatement(sql);
+			System.out.println("sql statement is: " + pstmt);
 
-			// Step 5: Set values
-			pstmt.setInt(1, noOfLeaveDays); // LEAVE_NO_OF_DAYS
-			pstmt.setString(2, mess); // LEAVE_MNGR_COMMENTS
-			pstmt.setInt(3, 3001); // EMP_ID
-			pstmt.setDate(4, Date.valueOf("2025-04-28")); // LEAVE_START_DATE
-			pstmt.setDate(5, Date.valueOf("2025-04-30")); // LEAVE_END_DATE
-			pstmt.setString(6, "EL"); // LEAVE_TYPE (enum)
-			pstmt.setString(7, "PENDING"); // LEAVE_STATUS (enum)
-			pstmt.setString(8, LeaveReason); // LEAVE_REASON
+			pstmt.setInt(1, leaveHistroy.getLeaveNoOfDays());             // LEAVE_NO_OF_DAYS
+			pstmt.setString(2, leaveHistroy.getLeaveMngrComments());      // LEAVE_MNGR_COMMENTS
+			pstmt.setInt(3, leaveHistroy.getEmpId());                     // EMP_ID
+			pstmt.setDate(4, leaveHistroy.getLeaveStartDate());           // LEAVE_START_DATE
+			pstmt.setDate(5, leaveHistroy.getLeaveEndDate());             // LEAVE_END_DATE
+			pstmt.setString(6, leaveHistroy.getLeaveReason());            // LEAVE_REASON
 
-			// Step 6: Execute
 			int rowsInserted = pstmt.executeUpdate();
+			System.out.println(rowsInserted + " row(s) inserted.");
+
 
 			if (rowsInserted > 0) {
 				System.out.println("Leave request submitted successfully.");
@@ -109,11 +124,9 @@ public class EmployeeDaoImpl implements EmployeeDao {
 			System.out.println("Leave request not submitted successfully.");
 			return "Leave request not submitted successfully";
 
-		}
+}
 
-		return "no leave is available for you";
-
-	}
+		
 
 	public int getLeaveBalance(int empId) throws SQLException, ClassNotFoundException {
 		Connection connection = ConnectionHelper.getConnection();
@@ -132,15 +145,16 @@ public class EmployeeDaoImpl implements EmployeeDao {
 	}
 
 	public void updateEmployLeave(int leaveDays, int empId) throws ClassNotFoundException, SQLException {
-		String sql = "UPDATE EMPLOYEE " + "SET EMP_AVAIL_LEAVE_BAL = EMP_AVAIL_LEAVE_BAL - ?"
-				+ "WHERE EMP_ID = ? AND EMP_AVAIL_LEAVE_BAL >= ?";
+		String sql = "UPDATE EMPLOYEE SET EMP_AVAIL_LEAVE_BAL = EMP_AVAIL_LEAVE_BAL - ? " +
+	             "WHERE EMP_ID = ?";
+
 
 		try (Connection connection = ConnectionHelper.getConnection();
 				PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
 			pstmt.setInt(1, leaveDays); // Leave to subtract
 			pstmt.setInt(2, empId); // Employee ID
-			pstmt.setInt(3, leaveDays); // Condition check (available balance)
+//			pstmt.setInt(3, leaveDays); // Condition check (available balance)
 
 			// Execute update
 			int rowsUpdated = pstmt.executeUpdate();
@@ -157,14 +171,13 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		}
 	}
 
-	public int noOfDays(String startDate, String endDate) {
-		LocalDate start = Date.valueOf(startDate).toLocalDate();
-		LocalDate end = Date.valueOf(endDate).toLocalDate();
+	public int noOfDays(Date startDate, Date endDate) {
+		LocalDate start =(startDate).toLocalDate();
+		LocalDate end = (endDate).toLocalDate();
 
-		// Calculate days between (inclusive)
 		long days = ChronoUnit.DAYS.between(start, end) + 1;
 
-		return (int) days; // Cast to int because method return type is int
+		return (int) days; 
 	}
 
 	@Override
